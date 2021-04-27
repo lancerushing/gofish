@@ -1,0 +1,181 @@
+openapi: 3.0.0
+info:
+  title: Go Fish API
+  version: 1.0.0
+paths:
+  /games:
+    post:
+      summary: Deal a deck of cards to the players
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameRequest'
+      responses:
+        '201':
+          description: Game created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+  /games/{gameId}/players/{playerName}:
+    get:
+      summary: View player's hand
+      parameters:
+      - name: gameId
+        in: path
+        required: true
+        schema:
+          type: string
+          example: abc12defgh34
+      - name: playerName
+        in: path
+        required: true
+        schema:
+          type: string
+          example: neo
+      responses:
+        '200':
+          description: Player's hand
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerHand'
+  /games/{gameId}/players/{playerName}/fish:
+    post:
+      summary: Request cards from another player
+      parameters:
+      - name: gameId
+        in: path
+        required: true
+        schema:
+          type: string
+          example: abc12defgh34
+      - name: playerName
+        in: path
+        required: true
+        schema:
+          type: string
+          example: neo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardRequest'
+      responses:
+        '201':
+          description: The cards received from the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceivedCards'
+components:
+  schemas:
+    GameRequest:
+      type: object
+      required:
+      - players
+      properties:
+        players:
+          type: array
+          items:
+            type: string
+          example:
+          - neo
+          - morpheus
+          minItems: 2
+          maxItems: 5
+          uniqueItems: true
+    Game:
+      type: object
+      properties:
+        game_id:
+          description: The ID that will be used for all subsequent requests related to this game
+          type: string
+          example: abc12defgh34
+        players:
+          type: array
+          items:
+            type: string
+          example:
+          - neo
+          - morpheus
+    PlayerHand:
+      type: object
+      properties:
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+          example:
+          - suit: clubs
+            rank: two
+          - suit: hearts
+            rank: three
+          - suit: spades
+            rank: five
+          - suit: diamonds
+            rank: eight
+          - suit: clubs
+            rank: king
+    Card:
+      type: object
+      required:
+      - suit
+      - rank
+      properties:
+        suit:
+          type: string
+          example: spades
+          enum:
+          - hearts
+          - spades
+          - diamonds
+          - clubs
+        rank:
+          type: string
+          example: ace
+          enum:
+          - ace
+          - two
+          - three
+          - four
+          - five
+          - six
+          - seven
+          - eight
+          - nine
+          - ten
+          - jack
+          - queen
+          - king
+    CardRequest:
+      type: object
+      required:
+      - player
+      - card
+      properties:
+        player:
+          description: The name of another player that you are requesting cards from
+          type: string
+          example: morpheus
+        rank:
+          description: The rank of card that you are requesting
+          type: string
+          example: king
+    ReceivedCards:
+      type: object
+      properties:
+        catch:
+          description: Did the card come from the player?
+          type: boolean
+          example: true
+        cards:
+          description: The cards that were received as a result of the fishing, whether from the other player or the stock pile.
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+# Added by API Auto Mocking Plugin
+servers:
+- description: SwaggerHub API Auto Mocking
+  url: https://virtserver.swaggerhub.com/nrivadeneiravericred/Cards/1.0.0
